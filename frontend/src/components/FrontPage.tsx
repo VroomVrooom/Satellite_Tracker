@@ -3,6 +3,9 @@ import '../index.css'
 import Orbit3D from "./Orbit3D"
 import SatelliteCard from "./SatCard"
 import OrbitalElementsCard from "./OrbitalElementsCard"
+import Globe3D from "./Globe3D"
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 type SatelliteData = {
     name: string
     time_utc: string
@@ -44,7 +47,7 @@ export default function FrontPage() {
         min_elev_deg: "10",
         visible_only: "true",
       })
-      const r = await fetch(`/api/satellite/${satName}/passes?` + qs)
+      const r = await fetch(`${API_BASE}/api/satellite/${satName}/passes?` + qs)
       if (!r.ok) throw new Error(`passes ${r.status}`)
       const j = (await r.json()) as { passes: PassInfo[] }
       setNextPass(j.passes?.[0] ?? null)
@@ -61,11 +64,11 @@ export default function FrontPage() {
     setNextPass(null)
 
     // fire NOW & PASSES in parallel (if we have location)
-    const nowReq = fetch(`/api/satellite/${name}/now`)
+    const nowReq = fetch(`${API_BASE}/api/satellite/${name}/now`)
     const passReq =
       geo &&
       fetch(
-        `/api/satellite/${name}/passes?` +
+        `${API_BASE}/api/satellite/${name}/passes?` +
           new URLSearchParams({
             lat: String(geo.lat),
             lon: String(geo.lon),
@@ -140,11 +143,11 @@ export default function FrontPage() {
     return(
         <div className = "font-bold text-2xl">
             <div className='flex items-center justify-center space-x-2 pb-2'>
-                <span className="text-5xl">Satellite Tracker</span>
+                <span className="text-5xl text-white">Satellite Tracker</span>
             </div>
             {/* Cards row */}
-      <div className = "flex space-x-5 pb-4">
-          <div className="flex flex-wrap flex-col gap-5">
+      <div className = "flex flex-col space-x-5 pb-4 items-center">
+          <div className="flex flex-wrap flex-row gap-5 pb-3">
             {SATELLITES.map((satellite) => (
               <SatelliteCard
                 key={satellite.code}
@@ -155,72 +158,89 @@ export default function FrontPage() {
               />
             ))}
           </div>
+
+          <div className="grid grid-cols-2 bg-gray-900 p-4 rounded-2xl shadow-lg gap-2">
+            <div className="">
+            <Globe3D lat={data?.subpoint.lat ?? 0} lon={data?.subpoint.lon ?? 0} />
+          </div>
           {/* Text data */}
           {data && (
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-2 text-center">
                 {/* Time */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 flex flex-col items-center justify-center h-full">
-                <span className="text-lg font-semibold text-gray-700">Time (UTC)</span>
-                <p className="text-[0.8em] font-bold text-gray-900 mt-1">{data.time_utc}</p>
+                <div className="rounded-xl border border-gray-600 bg-gray-800 shadow-sm flex flex-col items-center justify-center h-full">
+                <span className="text-lg font-bold text-gray-300">Time (UTC)</span>
+                <p className="text-[0.8em] font-semibold text-gray-200 mt-1">
+                  {new Date(data.time_utc).toLocaleString("en-AU", {
+                    timeZone: "Australia/Sydney",
+                    weekday: "short",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}
+                </p>
                 </div>
 
                 {/* Latitude */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 flex flex-col items-center justify-center h-full">
-                <span className="text-lg font-semibold text-gray-700">Latitude</span>
-                <p className="text-xl font-bold text-gray-900 mt-1">
+                <div className="rounded-xl border border-gray-600 bg-gray-800 shadow-sm flex flex-col items-center justify-center h-full">
+                <span className="text-lg font-bold text-gray-300">Latitude</span>
+                <p className="text-xl font-semibold text-gray-200 mt-1">
                     {data.subpoint.lat.toFixed(2)}°
                 </p>
                 </div>
 
                 {/* Longitude */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 flex flex-col items-center justify-center h-full">
-                <span className="text-lg font-semibold text-gray-700">Longitude</span>
-                <p className="text-xl font-bold text-gray-900 mt-1">
+                <div className="rounded-xl border border-gray-600 bg-gray-800 shadow-sm flex flex-col items-center justify-center h-full">
+                <span className="text-lg font-bold text-gray-300">Longitude</span>
+                <p className="text-xl font-semibold text-gray-200 mt-1">
                     {data.subpoint.lon.toFixed(2)}°
                 </p>
                 </div>
 
                 {/* Altitude */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 flex flex-col items-center justify-center h-full">
-                <span className="text-lg font-semibold text-gray-700">Altitude</span>
-                <p className="text-xl font-bold text-gray-900 mt-1">
+                <div className="rounded-xl border border-gray-600 bg-gray-800 shadow-sm flex flex-col items-center justify-center h-full">
+                <span className="text-lg font-bold text-gray-300">Altitude</span>
+                <p className="text-xl font-semibold text-gray-200 mt-1">
                     {data.subpoint.alt_km.toFixed(1)} km
                 </p>
                 </div>
             </div>
             )}
+          </div>
             {/* Next pass card */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pt-4">
               {geo && (
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col items-center text-center">
-                  <span className="text-lg font-semibold text-gray-700">Next Visible Pass at Your Location</span>
+                <div className="rounded-xl border border-gray-200 bg-gray-800 shadow-sm p-6 flex flex-col items-center text-center">
+                  <span className="text-lg font-semibold text-gray-300">Next Visible Pass at Your Location</span>
                   {!nextPass && !loading && (
-                    <p className="text-base text-gray-700 mt-2">
+                    <p className="text-base text-gray-200 mt-2">
                       No visible pass in the next 24 hours.
                     </p>
                   )}
                   {nextPass && (
                     <div className="mt-3 grid grid-cols-1 md:grid-cols-1 gap-4 w-full">
                       <div className="rounded-lg border border-gray-100 p-4">
-                        <div className="text-sm text-gray-600">Rise (AOS)</div>
-                        <div className="text-lg font-semibold">{toLocal(nextPass.aos_utc)}</div>
+                        <div className="text-sm text-gray-300">Rise (AOS)</div>
+                        <div className="text-lg font-semibold text-gray-200">{toLocal(nextPass.aos_utc)}</div>
                       </div>
                       <div className="rounded-lg border border-gray-100 p-4">
-                        <div className="text-sm text-gray-600">Peak (TCA)</div>
-                        <div className="text-lg font-semibold">{toLocal(nextPass.tca_utc)}</div>
-                        <div className="text-sm text-gray-600 mt-1">Max elev: {nextPass.max_elev_deg.toFixed(0)}°</div>
+                        <div className="text-sm text-gray-300">Peak (TCA)</div>
+                        <div className="text-lg font-semibold text-gray-200">{toLocal(nextPass.tca_utc)}</div>
+                        <div className="text-sm text-gray-300 mt-1">Max elev: {nextPass.max_elev_deg.toFixed(0)}°</div>
                       </div>
                       <div className="rounded-lg border border-gray-100 p-4">
-                        <div className="text-sm text-gray-600">Set (LOS)</div>
-                        <div className="text-lg font-semibold">{toLocal(nextPass.los_utc)}</div>
-                        <div className="text-sm text-gray-600 mt-1">Duration: {fmtDuration(nextPass.duration_s)}</div>
+                        <div className="text-sm text-gray-300">Set (LOS)</div>
+                        <div className="text-lg font-semibold text-gray-200">{toLocal(nextPass.los_utc)}</div>
+                        <div className="text-sm text-gray-300 mt-1">Duration: {fmtDuration(nextPass.duration_s)}</div>
                       </div>
                     </div>
                   )}
                 </div>
               )}
               {sat && (
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col">
+                <div className="rounded-xl border text-gray-200 border-gray-200 bg-gray-800 shadow-sm p-6 flex flex-col">
                   <OrbitalElementsCard satName={sat} />
                 </div>
               )}

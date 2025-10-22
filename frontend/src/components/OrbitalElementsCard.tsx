@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 type OrbitalElements = {
   inclination_deg: number
@@ -29,7 +30,7 @@ export default function OrbitalElementsCard({ satName }: Props) {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/satellite/${satName}/elements`)
+        const res = await fetch(`${API_BASE}/api/satellite/${satName}/elements`)
         if (!res.ok) throw new Error(`Failed: ${res.status}`)
         const data = await res.json()
         if (!cancelled) {
@@ -51,7 +52,7 @@ export default function OrbitalElementsCard({ satName }: Props) {
   if (!elements) return null
 
   return (
-    <div className="rounded-xl  bg-white p-6">
+    <div className="rounded-xl  bg-gray-800 p-6">
       <h3 className="text-lg font-semibold mb-2">
         Orbital Elements
       </h3>
@@ -62,34 +63,34 @@ export default function OrbitalElementsCard({ satName }: Props) {
       )}
 
       <div className="grid grid-cols-2 gap-y-2 text-sm">
-        <span className="text-gray-600">Inclination</span>
+        <span className="text-gray-200">Inclination</span>
         <span>{elements.inclination_deg.toFixed(2)}°</span>
 
-        <span className="text-gray-600">RAAN</span>
+        <span className="text-gray-200">RAAN</span>
         <span>{elements.raan_deg.toFixed(2)}°</span>
 
-        <span className="text-gray-600">Eccentricity</span>
+        <span className="text-gray-200">Eccentricity</span>
         <span>{elements.eccentricity.toExponential(4)}</span>
 
-        <span className="text-gray-600">Arg. of Perigee</span>
+        <span className="text-gray-200">Arg. of Perigee</span>
         <span>{elements.argument_of_perigee_deg.toFixed(2)}°</span>
 
-        <span className="text-gray-600">Mean Anomaly</span>
+        <span className="text-gray-200">Mean Anomaly</span>
         <span>{elements.mean_anomaly_deg.toFixed(2)}°</span>
 
-        <span className="text-gray-600">Mean Motion</span>
+        <span className="text-gray-200">Mean Motion</span>
         <span>{elements.mean_motion_rev_per_day.toFixed(4)} rev/day</span>
 
-        <span className="text-gray-600">Period</span>
+        <span className="text-gray-200">Period</span>
         <span>{elements.period_min.toFixed(2)} min</span>
 
-        <span className="text-gray-600">Semi-Major Axis</span>
+        <span className="text-gray-200">Semi-Major Axis</span>
         <span>{elements.semi_major_axis_km.toFixed(1)} km</span>
 
-        <span className="text-gray-600">Perigee Altitude</span>
+        <span className="text-gray-200">Perigee Altitude</span>
         <span>{elements.perigee_alt_km.toFixed(1)} km</span>
 
-        <span className="text-gray-600">Apogee Altitude</span>
+        <span className="text-gray-200">Apogee Altitude</span>
         <span>{elements.apogee_alt_km.toFixed(1)} km</span>
       </div>
     </div>

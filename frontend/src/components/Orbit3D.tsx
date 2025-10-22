@@ -1,9 +1,8 @@
 // src/components/Orbit3D.tsx
 import { useEffect, useRef, useState } from "react"
 import * as Cesium from "cesium"
-// If you haven't imported this CSS anywhere else, keep this line.
-// Otherwise move it to your root (e.g., main.tsx) to avoid duplicates.
 import "cesium/Build/Cesium/Widgets/widgets.css"
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 type TrackPoint = { time_utc: string; lat: number; lon: number; alt_km: number }
 
@@ -12,7 +11,6 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
   const viewerRef = useRef<Cesium.Viewer | null>(null)
   const [isPlaying, setIsPlaying] = useState(true)
 
-  // 1) Create the Cesium Viewer once
   useEffect(() => {
     if (!mountEl.current) return
     if (viewerRef.current) return
@@ -21,7 +19,7 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
       .VITE_CESIUM_ION_TOKEN as string
 
     const viewer = new Cesium.Viewer(mountEl.current, {
-      animation: false,          // we'll control play/pause ourselves
+      animation: false,
       timeline: true,
       shouldAnimate: true,
       baseLayerPicker: false,
@@ -56,9 +54,7 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
         if (liveTimer) window.clearInterval(liveTimer)
 
         // --- fetch ground track ---
-        const res = await fetch(
-          `/api/satellite/${satName}/track?minutes=90&step_s=30`
-        )
+        const res = await fetch(`${API_BASE}/api/satellite/${satName}/track?minutes=90&step_s=30`)
         if (!res.ok) throw new Error(`track fetch failed: ${res.status}`)
         const { points } = (await res.json()) as { points: TrackPoint[] }
         if (!Array.isArray(points) || points.length === 0) return
@@ -122,7 +118,7 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
         // --- append live samples every 5s so it stays fresh ---
         async function appendLive() {
           try {
-            const r = await fetch(`/api/satellite/${satName}/now`)
+            const r = await fetch(`${API_BASE}/api/satellite/${satName}/now`)
             if (!r.ok) return
             const d = await r.json()
             if (!d?.subpoint) return
@@ -168,8 +164,8 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
 
   // 4) JSX container for the viewer + simple controls
   return (
-    <div className="space-y-3 w-full h-full">
-      <div className="flex items-center gap-2">
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-white">
         <button onClick={togglePlay} className="px-3 py-1 rounded border">
           {isPlaying ? "Pause" : "Play"}
         </button>
@@ -186,9 +182,6 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
         <button onClick={() => setSpeed(120)} className="px-2 py-1 rounded border">
           120x
         </button>
-        <span className="ml-3 text-sm opacity-70">
-          Viewing: {(satName ?? "sat").toUpperCase()}
-        </span>
       </div>
 
       <div ref={mountEl} className="h-[70vh] w-full rounded-xl overflow-hidden" />
