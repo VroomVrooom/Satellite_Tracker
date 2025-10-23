@@ -65,7 +65,7 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
           name: `${satName} ground track`,
           polyline: {
             positions: Cesium.Cartesian3.fromDegreesArray(groundPositions),
-            width: 2,
+            width: 5,
           },
         })
 

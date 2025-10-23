@@ -364,3 +364,58 @@ def satellite_passes(
         "count": len(passes),
         "passes": passes,
     }
+
+
+# --- 3D orbital path (variable altitude) ------------------------
+def _orbit_path_points(sat: EarthSatellite, steps: int = 240, periods: float = 1.0):
+    """
+    Sample the satellite's position for 'periods' orbital periods into the future,
+    returning points with lat, lon, and altitude (km). Use this for a 3D orbit path.
+    """
+    # Use your existing element math to get period (min)
+    elems = get_tle_elements(sat)  # already defined in your file
+    period_min = elems["period_min"] if elems and "period_min" in elems else 90.0
+    period_s = period_min * 60.0
+    total_s = max(steps - 1, 1) * (period_s * periods) / max(steps - 1, 1)
+
+    t0 = datetime.now(timezone.utc)
+    # Build equally spaced times across the requested span
+    times = [ts.from_datetime(t0 + timedelta(seconds=i * total_s / (steps - 1)))
+             for i in range(steps)]
+
+    pts = []
+    for tt in times:
+        geo = sat.at(tt)
+        sp = wgs84.subpoint(geo)  # gives the nadir lat/lon and the satellite altitude above ellipsoid
+        pts.append({
+            "time_utc": tt.utc_iso(),
+            "lat": sp.latitude.degrees,
+            "lon": sp.longitude.degrees,
+            "alt_km": sp.elevation.km,  # altitude above WGS-84 ellipsoid
+        })
+    return pts
+
+@app.get("/api/satellite/{name}/orbit_path")
+def satellite_orbit_path(
+    name: str,
+    steps: int = 240,
+    periods: float = 1.0
+):
+    """
+    3D orbital path with varying altitude (shows eccentricity).
+    'steps' controls smoothness; 'periods' lets you draw >1 orbit.
+    """
+    key = name.lower()
+    if key not in SATELLITES:
+        raise HTTPException(status_code=404, detail=f"Satellite '{name}' not supported.")
+    info = SATELLITES[key]
+    sat = fetch_satellite(info["id"], info["tle_url"])
+
+    points = _orbit_path_points(sat, steps=steps, periods=periods)
+    return {
+        "satellite": key,
+        "norad_id": info["id"],
+        "steps": steps,
+        "periods": periods,
+        "points": points
+    }
