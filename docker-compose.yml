@@ -3,23 +3,24 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: spg4-backend
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
-    environment:
-      - PYTHONUNBUFFERED=1
+    networks:
+      - spg4net
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: spg4-frontend
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - "5173:80"
+    environment:
+      VITE_API_BASE: http://backend:8000
     depends_on:
       - backend
+    networks:
+      - spg4net
+
+networks:
+  spg4net:
+    driver: bridge

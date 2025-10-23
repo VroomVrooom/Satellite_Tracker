@@ -12,6 +12,8 @@ frontend/node_modules/
 frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
+frontend/.env
+frontend/.env.*
 
 # Lockfiles (optional: commit if you want reproducible builds)
 package-lock.json
@@ -29,6 +31,8 @@ env/
 venv/
 *.egg-info/
 .eggs/
+.DS_Store
+Thumbs.db
 
 # --- Environment files (never commit secrets) ---
 .env

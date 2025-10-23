@@ -17,7 +17,7 @@ app = FastAPI(title="Satellite Tracker (SGP4/Skyfield)")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -232,7 +232,7 @@ def get_tle_elements(sat):
 # Routes
 # ---------------------------
 
-@app.get("/satellite/{name}/elements")
+@app.get("/api/satellite/{name}/elements")
 def satellite_elements(name: str):
     key = name.lower()
     if key not in SATELLITES:
@@ -250,12 +250,12 @@ def satellite_elements(name: str):
     }
 
 
-@app.get("/ping")
+@app.get("/api/ping")
 def ping():
     return {"ok": True}
 
 
-@app.get("/satellite/{name}/now")
+@app.get("/api/satellite/{name}/now")
 def satellite_now(name: str):
     """
     Dynamic satellite endpoint.
@@ -270,7 +270,7 @@ def satellite_now(name: str):
 
 
 # --- Compatibility alias: /now returns ISS (ZARYA) ---
-@app.get("/now")
+@app.get("/api/now")
 def now_iss():
     info = SATELLITES["iss"]
     sat = fetch_satellite(info["id"], info["tle_url"])
@@ -278,7 +278,7 @@ def now_iss():
 
 
 # --- Simple ISS ground track, useful for the basic map ---
-@app.get("/track")
+@app.get("/api/track")
 def track(minutes: int = 90, step_s: int = 30):
     """
     Ground track for ISS for the next N minutes (default 90) sampled every step_s seconds.
@@ -303,7 +303,7 @@ def track(minutes: int = 90, step_s: int = 30):
         )
     return {"points": points}
 
-@app.get("/satellite/{name}/track")
+@app.get("/api/satellite/{name}/track")
 def satellite_track(name: str, minutes: int = 90, step_s: int = 30):
     key = name.lower()
     if key not in SATELLITES:
@@ -328,7 +328,7 @@ def satellite_track(name: str, minutes: int = 90, step_s: int = 30):
         )
     return {"points": points}
 
-@app.get("/satellite/{name}/passes")
+@app.get("/api/satellite/{name}/passes")
 def satellite_passes(
     name: str,
     lat: float = Query(..., description="Observer latitude (deg)"),
