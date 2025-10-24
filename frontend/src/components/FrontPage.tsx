@@ -183,13 +183,13 @@ export default function FrontPage() {
           ))}
         </div>
 
-        <div className="flex flex-row bg-gray-900 p-2 rounded-2xl shadow-lg gap-2 overflow-hidden">
-          <div className="flex items-center justify-center bg-gray-950">
+        <div className="flex flex-row justify-center bg-gray-900 p-2 rounded-2xl shadow-lg gap-2">
+          <div className="flex items-center justify-center bg-gray-950 rounded-2xl">
             <Globe3D
               lat={data?.subpoint.lat ?? 0}
               lon={data?.subpoint.lon ?? 0}
               altKm={data?.subpoint.alt_km ?? 0}
-              track={track}
+              satelliteCode={sat}
             />
           </div>
           {/* Text data */}
@@ -243,7 +243,7 @@ export default function FrontPage() {
                 </div>
               </div>
               {geo && (
-                <div className="rounded-xl border border-gray-200 bg-gray-800 shadow-sm p-6 flex flex-col items-center text-center">
+                <div className="rounded-xl border border-gray-600 bg-gray-800 shadow-sm p-6 flex flex-col items-center text-center">
                   <span className="text-sm font-semibold text-gray-300">
                     Next Visible Pass at Your Location
                   </span>
@@ -254,13 +254,13 @@ export default function FrontPage() {
                   )}
                   {nextPass && (
                     <div className="mt-3 grid grid-cols-1 md:grid-row-3 gap-4 w-full">
-                      <div className="rounded-lg border border-gray-100 p-2">
+                      <div className="rounded-lg border border-gray-600 p-2">
                         <div className="text-sm text-gray-300">Rise (AOS)</div>
                         <div className="text-lg font-semibold text-gray-200">
                           {toLocal(nextPass.aos_utc)}
                         </div>
                       </div>
-                      <div className="rounded-lg border border-gray-100 p-2">
+                      <div className="rounded-lg border border-gray-600 p-2">
                         <div className="text-sm text-gray-300">Peak (TCA)</div>
                         <div className="text-lg font-semibold text-gray-200">
                           {toLocal(nextPass.tca_utc)}
@@ -269,7 +269,7 @@ export default function FrontPage() {
                           Max elev: {nextPass.max_elev_deg.toFixed(0)}°
                         </div>
                       </div>
-                      <div className="rounded-lg border border-gray-100 p-2">
+                      <div className="rounded-lg border border-gray-600 p-2">
                         <div className="text-sm text-gray-300">Set (LOS)</div>
                         <div className="text-lg font-semibold text-gray-200">
                           {toLocal(nextPass.los_utc)}
@@ -285,11 +285,11 @@ export default function FrontPage() {
             </div>
           )}
           {/* Next pass card */}
-          <div className="flex-1">
+          <div className="">
             {sat && (
               <div
-                className="rounded-xl border text-gray-200 border-gray-200 bg-gray-800 justify-center items-center
-              h-full shadow-sm p-2 flex flex-col"
+                className="rounded-xl border text-gray-200 border-gray-600 bg-gray-800 justify-center items-center
+              h-full shadow-sm flex flex-col"
               >
                 <OrbitalElementsCard satName={sat} />
               </div>

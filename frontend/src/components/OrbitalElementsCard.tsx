@@ -52,8 +52,8 @@ export default function OrbitalElementsCard({ satName }: Props) {
   if (!elements) return null
 
   return (
-    <div className="rounded-xl  bg-gray-800 p-6">
-      <h3 className="text-lg font-semibold mb-2">
+    <div className="rounded-xl bg-gray-800 p-4">
+      <h3 className="text-lg font-semibold mb-2 text-center">
         Orbital Elements
       </h3>
       {epoch && (

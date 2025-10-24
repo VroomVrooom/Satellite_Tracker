@@ -11,7 +11,7 @@ export default function Globe3D({
   lat,
   lon,
   altKm = 0,
-  satelliteCode = "iss",
+  satelliteCode,
 }: {
   lat: number;
   lon: number;
