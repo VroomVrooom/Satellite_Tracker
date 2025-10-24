@@ -6,6 +6,18 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 
 type TrackPoint = { time_utc: string; lat: number; lon: number; alt_km: number }
 
+const SAT_IMAGE: Record<string, string> = {
+  iss: "/satellites/iss.png",
+  hubble: "/satellites/hubble.png",
+  css: "/satellites/css.png",
+  noaa20: "/satellites/noaa-200.png",
+};
+
+function imageFor(satName?: string) {
+  const key = (satName || "").toLowerCase();
+  return SAT_IMAGE[key] ?? "/satellites/default.png";
+}
+
 export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
   const mountEl = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<Cesium.Viewer | null>(null)
@@ -65,7 +77,7 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
           name: `${satName} ground track`,
           polyline: {
             positions: Cesium.Cartesian3.fromDegreesArray(groundPositions),
-            width: 5,
+            width: 2,
           },
         })
 
@@ -86,7 +98,6 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
           position.addSample(t, pos)
         }
 
-        // --- configure the clock/timeline ---
         viewer.clock.startTime = start.clone()
         viewer.clock.stopTime = stop.clone()
         viewer.clock.currentTime = start.clone()
@@ -95,12 +106,20 @@ export default function Orbit3D({ satName = "iss" }: { satName?: string }) {
         viewer.clock.shouldAnimate = isPlaying
         viewer.timeline.zoomTo(start, stop)
 
-        // --- satellite "dot" + label + trail ---
+        // Satellite entity with billboard, label, and path
         const labelText = (satName ?? "sat").toUpperCase()
         const entity = viewer.entities.add({
           name: labelText,
           position,
-          point: { pixelSize: 10 },
+          billboard: {
+            image: imageFor(satName),
+            width: 48,
+            height: 48,
+            scale: 1,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            color: Cesium.Color.WHITE.withAlpha(0.9),
+          },
           label: {
             text: labelText,
             font: "14px sans-serif",
